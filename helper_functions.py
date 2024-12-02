@@ -21,7 +21,8 @@ def regression(subgroup_target, dataset_target, comparecache, use_complement=Fal
         return 0, 0
     if (1 - p) < 0.99: # if the p-value is bad, don't use this model
         return 0, 0
-    return entropy(subgroup_target, dataset_target) * abs(coef - comparecache), coef
+    smallestcoefdiff = min([abs(coef - i) for i in comparecache]) 
+    return entropy(subgroup_target, dataset_target) * smallestcoefdiff, coef
 
 def entropy(subgroup_target, dataset_target):
     """Function that calculates entropy. This is used in the regression function"""
@@ -45,7 +46,7 @@ def create_subgroup_lists(subgroup, column: str, settings: dict):
         while len(values) > 0:
             value = values.pop(0)
             subset = data[data[column] == value]
-            resultinggroups.append( Subgroup(subset, deepcopy(subgroup.description).extend(column, value)))
+            resultinggroups.append( Subgroup(subset, deepcopy(subgroup.description).extend(column, value), deepcopy(subgroup.regressioncache)))         
     else:  # Float or Int
         if settings['bin_strategy'] == 'equidepth':
             _, intervals = pd.qcut(data[column].tolist(), q=min(settings['n_bins'], len(values)),
@@ -57,7 +58,7 @@ def create_subgroup_lists(subgroup, column: str, settings: dict):
         while len(intervals) > 0:
                 upper_bound = intervals.pop(0)
                 subset = data[(data[column] > lower_bound) & (data[column] <= upper_bound)]
-                resultinggroups.append( Subgroup(subset, deepcopy(subgroup.description).extend(column, [lower_bound, upper_bound])) )
+                resultinggroups.append( Subgroup(subset, deepcopy(subgroup.description).extend(column, [lower_bound, upper_bound]), deepcopy(subgroup.regressioncache)) )
                 lower_bound = upper_bound
     return resultinggroups
 

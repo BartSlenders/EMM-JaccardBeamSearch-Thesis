@@ -15,14 +15,6 @@ class EMM():
                  n_bins = 10, bin_strategy = 'equidepth', candidate_size = None, log_level=1 ) -> None:
         """Initialization for the beam search exceptional model mining procedure"""
         logging.basicConfig(filename=None, level=log_level, format='%(asctime)s - %(levelname)s - %(message)s')
-        # removed the n_jobs from code, because we removed the multicore processing
-        # if hasattr(evaluation_metric, '__call__'):
-        #     self.evaluation_function = evaluation_metric
-        # else:
-        #     try:
-        #         self.evaluation_function = metrics[evaluation_metric]
-        #     except KeyError:
-        #         raise ValueError(f"Nu such metric: {evaluation_metric}")
         self.settings = dict(
             strategy=strategy,
             width=width,
@@ -40,11 +32,11 @@ class EMM():
         """This method takes a dataset and prepares it for the beam search
         target cols is supposed to be a list of 2 strings, representing column names"""
         logging.info("Start")
-        self.data, translations = downsize(deepcopy(data))
+        data, translations = downsize(deepcopy(data))
         self.settings['object_cols'] = translations
-        dataset = Subgroup(data, Description('all'))
-        _, dataset.target = regression(data[target_cols], data[target_cols],comparecache=0)
-        self.regressioncache = dataset.target
+        dataset = Subgroup(deepcopy(data), Description('all'), [])
+        _, dataset.target = regression(data[target_cols], data[target_cols],comparecache=[0])
+        # self.regressioncache = dataset.target
         self.beam = Beam(dataset, self.settings)
         target_cols = list(target_cols,)
         if descriptive_cols == None:
@@ -60,6 +52,8 @@ class EMM():
         """This method creates all possible subgroups in the current state"""
         subgroups = []
         for subgroup in self.beam.subgroups:
+                regressioncacheforthissubgroup = deepcopy(subgroup.target)
+                subgroup.append_regression_cache(regressioncacheforthissubgroup)
                 for col in self.descriptive_cols:
                     newgroups = create_subgroup_lists(subgroup, col, self.settings)
                     subgroups = subgroups + newgroups
@@ -69,7 +63,7 @@ class EMM():
         """This method calculates scores for all candidate subgroups made in the subgroupify method"""
         for candidate in self.candidates:
             candidate_target = candidate.data[self.target_columns]
-            candidate.score, candidate.target = regression(candidate_target, self.dataset_target, comparecache=self.regressioncache)
+            candidate.score, candidate.target = regression(candidate_target, self.dataset_target, comparecache=candidate.regressioncache)
             self.beam.add(candidate)
         self.beam.select_cover_based()
         if print_result == True:
