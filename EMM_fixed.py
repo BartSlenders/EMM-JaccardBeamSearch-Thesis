@@ -15,14 +15,6 @@ class EMM():
                  n_bins = 10, bin_strategy = 'equidepth', candidate_size = None, log_level=1 ) -> None:
         """Initialization for the beam search exceptional model mining procedure"""
         logging.basicConfig(filename=None, level=log_level, format='%(asctime)s - %(levelname)s - %(message)s')
-        # removed the n_jobs from code, because we removed the multicore processing
-        # if hasattr(evaluation_metric, '__call__'):
-        #     self.evaluation_function = evaluation_metric
-        # else:
-        #     try:
-        #         self.evaluation_function = metrics[evaluation_metric]
-        #     except KeyError:
-        #         raise ValueError(f"Nu such metric: {evaluation_metric}")
         self.settings = dict(
             strategy=strategy,
             width=width,
@@ -43,8 +35,8 @@ class EMM():
         self.data, translations = downsize(deepcopy(data))
         self.settings['object_cols'] = translations
         dataset = Subgroup(data, Description('all'))
-        _, dataset.target = regression(data[target_cols], data[target_cols],comparecache=0)
-        self.regressioncache = dataset.target
+        _, dataset.target = regression(data[target_cols], data[target_cols],comparecache=[0])
+        self.regressioncache = [dataset.target]
         self.beam = Beam(dataset, self.settings)
         target_cols = list(target_cols,)
         if descriptive_cols == None:
@@ -72,6 +64,10 @@ class EMM():
             candidate.score, candidate.target = regression(candidate_target, self.dataset_target, comparecache=self.regressioncache)
             self.beam.add(candidate)
         self.beam.select_cover_based()
+        # update regressioncache after selecting subgroups
+        for subgroup in self.beam.subgroups:
+            self.regressioncache.append(subgroup.target)
+        # print
         if print_result == True:
             self.beam.print()
         else:

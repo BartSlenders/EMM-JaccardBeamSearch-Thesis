@@ -21,7 +21,8 @@ def regression(subgroup_target, dataset_target, comparecache, use_complement=Fal
         return 0, 0
     if (1 - p) < 0.99: # if the p-value is bad, don't use this model
         return 0, 0
-    return entropy(subgroup_target, dataset_target) * abs(coef - comparecache), coef
+    smallestcoefdiff = min([abs(coef - i) for i in comparecache]) 
+    return entropy(subgroup_target, dataset_target) * smallestcoefdiff, coef
 
 def entropy(subgroup_target, dataset_target):
     """Function that calculates entropy. This is used in the regression function"""
@@ -38,7 +39,6 @@ def create_subgroup_lists(subgroup, column: str, settings: dict):
         return []
     data = subgroup.data
     values = list(data[column].unique())
-    # if we calculate an extra regressioncache here <--------------------------------------------------------------
     if len(values) == 1:  # No need to make a split for a single value
         return []
     if column in settings['object_cols'] or len(values) < settings['n_bins']:

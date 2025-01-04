@@ -102,8 +102,8 @@ class Jaccard_EMM:
         data, translations = downsize(deepcopy(data))
         self.settings['object_cols'] = translations
         dataset = Subgroup(data, Description('all'))
-        _, dataset.target = regression(data[target_cols], data[target_cols],0)
-        self.regressioncache = dataset.target
+        _, dataset.target = regression(data[target_cols], data[target_cols],[0])
+        self.regressioncache = [dataset.target]
         self.beam = Jaccard_Beam(dataset, self.settings)
         self.jaccard_matrix = None
         target_cols = list(target_cols, )
@@ -134,6 +134,9 @@ class Jaccard_EMM:
             candidate.score, candidate.target = regression(candidate_target, self.dataset_target, comparecache=self.regressioncache)
             self.beam.add(candidate) # the jacscore is calculated when adding to the beam
         self.beam.select_cover_based()
+        # update regressioncache after selecting subgroups
+        for subgroup in self.beam.subgroups:
+            self.regressioncache.append(subgroup.target)
         if print_result == True:
             self.beam.print()
         else:
