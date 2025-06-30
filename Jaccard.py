@@ -68,20 +68,6 @@ class Jaccard_EMM:
                  strategy: str = 'maximize', n_bins: int = 10, bin_strategy: Optional[str] = 'equidepth',
                  candidate_size: int = None, log_level=50):
         logging.basicConfig(filename=None, level=log_level, format='%(asctime)s - %(levelname)s - %(message)s')
-        if None:  ### THIS IS OLD STUFF THAT WAS USED TO MULTITHREAD AND USE OTHER EVALUATION METRICS, WE DONT USE IT
-            # self.evaluation_metric = evaluation_metric  
-            # if n_jobs == -1:
-            #     self.n_jobs = cpu_count()
-            # else:
-            #     self.n_jobs = min(n_jobs, cpu_count())
-            # if hasattr(evaluation_metric, '__call__'):
-            #     self.evaluation_function = evaluation_metric
-            # else:
-            #     try:
-            #         self.evaluation_function = metrics[evaluation_metric]
-            #     except KeyError:
-            #         raise ValueError(f"Nu such metric: {evaluation_metric}")
-            pass
         self.settings = dict(
             strategy=strategy,
             width=width,
@@ -142,11 +128,11 @@ class Jaccard_EMM:
         else:
             logging.info("finished an iteration")
     
-    def increase_depth(self,iterations = 1, print_result_between_iterations=False):
+    def increase_depth(self,iterations = 1, print_result_between_iterations=False, print_result_end=False):
         for _ in range(iterations):
             self.subgroupify()
             self.calc_score(print_result=print_result_between_iterations)
-        if print_result_between_iterations == False:
+        if print_result_end == True:
             self.beam.print()
     
     def search(self, data, target_cols):
@@ -174,6 +160,7 @@ class Jaccard_Beam:
         self.jaclist = []
         self.jacscores = []
         self.full = False
+        self.all = []
 
     def add(self, subgroup: Subgroup):
         """Adds a subgroup to the beam
@@ -240,6 +227,7 @@ class Jaccard_Beam:
             subgroup.jaccard = self.jaclist[i]
             subgroup.jacscore = self.jacscores[i]
         self.candidates = []
+        self.all.append(self.subgroups)
         # self.jaclist = []
         # self.jacscores = []
 
@@ -248,10 +236,37 @@ class Jaccard_Beam:
             s.decrypt_description(translation)
 
     def print(self):
-        self.sort() # this used to be on coverage, but this is deprecated; it doesn't work in current version
+        self.sort()
         logging.debug("-" * 20)
         for s in self.subgroups:
             s.printreal()
+    
+    def calculate_q(self):
+        """This function looks at all previous iterations of the beam and 
+            takes the w best subgroups across all iterations
+        """
+        q = []
+        for w in self.all:
+            for subgroup in w:
+                q.append(subgroup)
+        q.sort(key=lambda x: x.score, reverse=(self.strategy == 'maximize'))
+        self.q = q[0:self.max_items]
+        return self.q
+
+    def print_q(self, calculate = False):
+        """This function prints the subgroups selected in the calculate_q function in a interpretable way
+        """
+        try:
+            self.q == []
+        except: ## if the previous statement raised an error, that means q doesnt exist yet, so it has to be calculated
+            calculate = True
+        if calculate == True:
+            self.calculate_q()
+            logging.debug("calculating q")
+        logging.debug("-" * 20)
+        for s in self.q:
+            s.printreal()
+
 
 # if __name__ =="__main__":
 #     df = pd.read_csv('example/data/german-credit-scoring.csv', sep=";")

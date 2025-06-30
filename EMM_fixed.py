@@ -73,11 +73,11 @@ class EMM():
         else:
             logging.info("finished an iteration")
     
-    def increase_depth(self,iterations = 1, print_result_between_iterations=False):
+    def increase_depth(self,iterations = 1, print_result_between_iterations=False, print_result_end=False):
         for _ in range(iterations):
             self.subgroupify()
             self.calc_score(print_result=print_result_between_iterations)
-        if print_result_between_iterations == False:
+        if print_result_end == True:
             self.beam.print()
     
     def search(self, data, target_cols):
