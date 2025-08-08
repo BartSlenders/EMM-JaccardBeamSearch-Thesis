@@ -62,3 +62,28 @@ def generatemoresets(datasize = 2000, randomvariables = 20, mean = 10, errorsd =
     df['result'] = result
     df['predictor'] = predictor
     return df
+
+
+
+
+def generatedepth3(datasize = 2000, randomvariables = 20, mean = 10, errorsd = 0.5, exceptionality= 1, pollutionset=4):
+    result = []
+    predictor = list(np.random.normal(mean,3,datasize))         # STANDARD DEVIATION IS LOCKED AT 3 HERE
+    variables = [list(np.random.binomial(1,0.4,datasize)) for _ in range(randomvariables)]
+    # generate result;
+    # result data where first two variables are both 1 is different
+    for i in range(datasize):
+        v = 10
+        if variables[2][i] == 0:
+            v+=pollutionset
+        elif variables[0][i] == 1 and variables[1][i] == 1 and variables[3][i] == 1:
+            v-=exceptionality
+        result.append((v)* predictor[i]  + np.random.normal(0,errorsd) )
+
+
+    # create a dataframe with number i as column title with the before generated columns
+    df = pd.DataFrame({i:ls for i,ls in enumerate(variables)})
+
+    df['result'] = result
+    df['predictor'] = predictor
+    return df
