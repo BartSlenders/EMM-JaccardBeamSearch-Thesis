@@ -64,9 +64,12 @@ def jaccardmax(candidate, subgroups):
 
 
 class Jaccard_EMM:
+    """Object for Jaccard beam search
+    Works only with regression for now"""
     def __init__(self, width: int, depth: int=1, 
                  strategy: str = 'maximize', n_bins: int = 10, bin_strategy: Optional[str] = 'equidepth',
                  candidate_size: int = None, log_level=50):
+        """Initialization for the beam search exceptional model mining procedure"""
         logging.basicConfig(filename=None, level=log_level, format='%(asctime)s - %(levelname)s - %(message)s')
         self.settings = dict(
             strategy=strategy,
