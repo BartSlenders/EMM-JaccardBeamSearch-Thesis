@@ -6,7 +6,7 @@ from description import Description
 
 class Subgroup:
 
-    def __init__(self, data: pd.DataFrame, description: Description):
+    def __init__(self, data: pd.DataFrame, description: Description, regressioncache = []):
         self.data = data
         self.description = description
         self.score = None
@@ -14,9 +14,14 @@ class Subgroup:
         self.coverage = None
         self.jacscore = None
         self.jaccard = None
+        self.regressioncache = regressioncache
 
     def decrypt_description(self, translation):
         self.description.decrypt(translation)
+
+    def append_regression_cache(self, regressioncache):
+        """regressioncache is a list of all caches until this depth"""
+        self.regressioncache.append(regressioncache)
 
     @property
     def size(self):

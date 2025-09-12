@@ -45,7 +45,7 @@ def create_subgroup_lists(subgroup, column: str, settings: dict):
         while len(values) > 0:
             value = values.pop(0)
             subset = data[data[column] == value]
-            resultinggroups.append( Subgroup(subset, deepcopy(subgroup.description).extend(column, value)))
+            resultinggroups.append( Subgroup(subset, deepcopy(subgroup.description).extend(column, value), deepcopy(subgroup.regressioncache)))         
     else:  # Float or Int
         if settings['bin_strategy'] == 'equidepth':
             _, intervals = pd.qcut(data[column].tolist(), q=min(settings['n_bins'], len(values)),
@@ -57,7 +57,7 @@ def create_subgroup_lists(subgroup, column: str, settings: dict):
         while len(intervals) > 0:
                 upper_bound = intervals.pop(0)
                 subset = data[(data[column] > lower_bound) & (data[column] <= upper_bound)]
-                resultinggroups.append( Subgroup(subset, deepcopy(subgroup.description).extend(column, [lower_bound, upper_bound])) )
+                resultinggroups.append( Subgroup(subset, deepcopy(subgroup.description).extend(column, [lower_bound, upper_bound]), deepcopy(subgroup.regressioncache)) )
                 lower_bound = upper_bound
     return resultinggroups
 

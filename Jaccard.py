@@ -103,11 +103,14 @@ class Jaccard_EMM:
             raise ValueError("All specified columns should be present in the dataset")
         self.dataset_target = data[target_cols]
         self.target_columns = target_cols
+        # return dataset            # this was a debugging line
 
     def subgroupify(self):
         """This method creates all possible subgroups in the current state"""
         subgroups = []
         for subgroup in self.beam.subgroups:
+                regressioncacheforthissubgroup = deepcopy(subgroup.target)
+                subgroup.append_regression_cache(regressioncacheforthissubgroup)
                 for col in self.descriptive_cols:
                     newgroups = create_subgroup_lists(subgroup, col, self.settings)
                     subgroups = subgroups + newgroups
@@ -117,7 +120,7 @@ class Jaccard_EMM:
         """This method calculates scores for all candidate subgroups made in the subgroupify method"""
         for candidate in self.candidates:
             candidate_target = candidate.data[self.target_columns]
-            candidate.score, candidate.target = regression(candidate_target, self.dataset_target, comparecache=self.regressioncache)
+            candidate.score, candidate.target = regression(candidate_target, self.dataset_target, comparecache=candidate.regressioncache)
             self.beam.add(candidate) # the jacscore is calculated when adding to the beam
         self.beam.select_cover_based()
         # update regressioncache after selecting subgroups
