@@ -35,8 +35,8 @@ class EMM():
         data, translations = downsize(deepcopy(data))
         self.settings['object_cols'] = translations
         dataset = Subgroup(data, Description('all'))
-        _, dataset.target = regression(data[target_cols], data[target_cols],comparecache=0)
-        self.regressioncache = dataset.target
+        _, dataset.target = regression(data[target_cols], data[target_cols],comparecache=[0])
+        self.regressioncache = [dataset.target]
         self.beam = Beam(dataset, self.settings)
         target_cols = list(target_cols,)
         if descriptive_cols == None:
