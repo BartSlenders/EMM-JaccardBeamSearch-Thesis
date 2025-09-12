@@ -20,6 +20,7 @@ class Beam:
         self.strategy = settings['strategy']
         self.min_score = None
         self.scores = []
+        self.all = []
 
     def add(self, subgroup: Subgroup):
         if len(self.candidates) < self.candidate_size:
@@ -59,6 +60,7 @@ class Beam:
         self.min_score = min(self.scores) if self.strategy == 'maximize' else max(self.scores)
         self.candidates = []
         self.scores = []
+        self.all.append(self.subgroups)
 
     def decrypt_descriptions(self, translation):
         for s in self.subgroups:
@@ -68,4 +70,30 @@ class Beam:
         self.sort(attribute=sorter)
         logging.debug("-" * 20)
         for s in self.subgroups:
+            s.print()
+
+    def calculate_q(self):
+        """This function looks at all previous iterations of the beam and 
+            takes the w best subgroups across all iterations
+        """
+        q = []
+        for w in self.all:
+            for subgroup in w:
+                q.append(subgroup)
+        q.sort(key=lambda x: x.score, reverse=(self.strategy == 'maximize'))
+        self.q = q[0:self.max_items]
+        return self.q
+    
+    def print_q(self, calculate = False):
+        """This function prints the subgroups selected in the calculate_q function in a interpretable way
+        """
+        try:
+            self.q == []
+        except: ## if the previous statement raised an error, that means q doesnt exist yet, so it has to be calculated
+            calculate = True
+        if calculate == True:
+            logging.debug("calculating q")
+            self.calculate_q()
+        logging.debug("-" * 20)
+        for s in self.q:
             s.print()

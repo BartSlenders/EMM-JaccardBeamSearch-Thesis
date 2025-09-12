@@ -39,7 +39,6 @@ def create_subgroup_lists(subgroup, column: str, settings: dict):
         return []
     data = subgroup.data
     values = list(data[column].unique())
-    # if we calculate an extra regressioncache here <--------------------------------------------------------------
     if len(values) == 1:  # No need to make a split for a single value
         return []
     if column in settings['object_cols'] or len(values) < settings['n_bins']:

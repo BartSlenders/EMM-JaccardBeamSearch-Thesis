@@ -34,9 +34,9 @@ class EMM():
         logging.info("Start")
         data, translations = downsize(deepcopy(data))
         self.settings['object_cols'] = translations
-        dataset = Subgroup(deepcopy(data), Description('all'), [])
+        dataset = Subgroup(data, Description('all'))
         _, dataset.target = regression(data[target_cols], data[target_cols],comparecache=[0])
-        # self.regressioncache = dataset.target
+        self.regressioncache = [dataset.target]
         self.beam = Beam(dataset, self.settings)
         target_cols = list(target_cols,)
         if descriptive_cols == None:
@@ -66,16 +66,20 @@ class EMM():
             candidate.score, candidate.target = regression(candidate_target, self.dataset_target, comparecache=candidate.regressioncache)
             self.beam.add(candidate)
         self.beam.select_cover_based()
+        # update regressioncache after selecting subgroups
+        for subgroup in self.beam.subgroups:
+            self.regressioncache.append(subgroup.target)
+        # print
         if print_result == True:
             self.beam.print()
         else:
             logging.info("finished an iteration")
     
-    def increase_depth(self,iterations = 1, print_result_between_iterations=False):
+    def increase_depth(self,iterations = 1, print_result_between_iterations=False, print_result_end=False):
         for _ in range(iterations):
             self.subgroupify()
             self.calc_score(print_result=print_result_between_iterations)
-        if print_result_between_iterations == False:
+        if print_result_end == True:
             self.beam.print()
     
     def search(self, data, target_cols):
