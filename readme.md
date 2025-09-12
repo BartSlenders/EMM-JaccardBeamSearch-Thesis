@@ -19,7 +19,7 @@ I tried to keep things decently commented while working, but undoubtedly you wil
 
 
 **P.S.**
-There are a few files that I haven't touched in so long and might have become unused. I am talking about visualization.py, workers.py, util.py, dissassembly.ipynb
+There are a few files that I haven't touched in so long and might have become unused. I am talking about visualization.py, workers.py, util.py, dissassembly.ipynb (and anything that has "first commit" as its last commit)
 I don't know if anything relies on these files so I haven't removed them.
 
 Lastly, pattern_team.py is a pattern team that tries to use all the created models to create a joined model. I wrote a very short bit about this in my appendix.
