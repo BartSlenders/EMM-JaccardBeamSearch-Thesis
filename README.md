@@ -1,3 +1,11 @@
+What you see below is some documentation of the previous version of this work.
+
+This branch I tried to compare each candidate set in the beam with only the direct parent rather than the entire previous beam. This did not work out. If this sentence doesn't make sense to you, just ignore this branch or come back later when you do.
+
+
+
+
+
 ## Exceptional Model Mining (EMM)
 Excetional Model Mining is a descriptive modeling technique to discover interesting patterns in datasets.
 Whether a pattern is exceptional or not is often quite subjective and dependent on the context.
